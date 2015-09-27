@@ -15,6 +15,7 @@ import com.example.wifidemo.R;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -27,7 +28,10 @@ import android.provider.SyncStateContract.Constants;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -42,18 +46,25 @@ public class ConnectionActivity extends Activity {
 	private TextView response;
 	private Button testPW;
 	private String MAC_ADDRESS;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		/*DrawView d = new DrawView(this);
+		Canvas canvas = new Canvas(); 
+		d.onDraw(canvas);
+		MainLayout.addView(d);*/
 		setContentView(R.layout.activity_connection);
+		
+	    
 		tv1 = (TextView)findViewById(R.id.tv1);
 		tv2 = (TextView)findViewById(R.id.tv2);
 		tv3 = (TextView)findViewById(R.id.tv3);
 		response = (TextView)findViewById(R.id.response);
-		testPW = (Button)findViewById(R.id.default_pw_button);
+		testPW = (Button)findViewById(R.id.manufacturer_button);
 		MAC_ADDRESS = getMacAddress();
 		tv3.setText("MAC_ADDRESS " + MAC_ADDRESS);
+		
+		
 		
 		Bundle b = this.getIntent().getExtras();
 		if(b!=null) {
@@ -63,20 +74,19 @@ public class ConnectionActivity extends Activity {
 			tv2.setText("Capabilities: " + CurrentScanResult.capabilities.toString());
 		}
 		
-		
-		
 		testPW.setOnClickListener( new OnClickListener () {
 			@Override
 			public void onClick(View v) {
 				HttpClient httpClient = new DefaultHttpClient();
 				HttpPost post = new HttpPost("http://www.macvendorlookup.com/api/v2/"+MAC_ADDRESS);
-				
+				Log.d(DEBUG, "RESPONSE1");
 				try {
+					Log.d(DEBUG, "RESPONSE2");
 				    HttpResponse response = httpClient.execute(post);
 				    HttpEntity entity = response.getEntity();
 				    String responseString = EntityUtils.toString(entity, "UTF-8");
-				    // write response to log
 				    tv2.setText("RESPONSE: "+responseString);
+				    Log.d(DEBUG, responseString+"");
 				} catch (ClientProtocolException e) {
 				    // Log exception
 				    e.printStackTrace();
@@ -84,32 +94,18 @@ public class ConnectionActivity extends Activity {
 				    // Log exception
 				    e.printStackTrace();
 				}
-				/*HTTPHelper http = new HTTPHelper("admin", "password", "http://192.168.1.1/");
+				
+				HTTPHelper http = new HTTPHelper("admin", "password", "http://192.168.1.1/start.htm");
 				try {
 					int resp = http.getResponse();
-					//String mac = http.getMacAddress();
-					//response.setText(mac+"");
-					Log.d(DEBUG, resp+"");
+					Log.d(DEBUG, "RESPONSE2: "+resp);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}*/
-				
-				// conntecting to wifi source.
-				/*WifiConfiguration wifiConfig = new WifiConfiguration();
-				wifiConfig.SSID = String.format("\"%s\"", SSID);
-				wifiConfig.preSharedKey = String.format("\"%s\"", "*");
-
-				WifiManager wifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
-				//remember id
-				int netId = wifiManager.addNetwork(wifiConfig);
-				wifiManager.disconnect();
-				wifiManager.enableNetwork(netId, true);
-				wifiManager.reconnect();*/
+				}
 			}
 		});
 	}
-	
 	private String getMacAddress() {
 		// get the MAC address
 		WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
