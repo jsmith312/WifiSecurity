@@ -1,5 +1,6 @@
 package com.example.wifisecurity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.provider.SyncStateContract.Constants;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,22 +23,25 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import com.example.wifidemo.R;
 
 public class MainActivity extends Activity  {
-   ListView lv;
-   WifiManager wifi;
-   String wifis[];
-   WifiScanReceiver wifiReciever;
-   List<ScanResult> wifiList;
-   ScanResult wifisObj[];
-   @Override
+   private ListView lv;
+   private WifiManager wifi;
+   private String wifis[];
+   private WifiScanReceiver wifiReciever;
+   private List<ScanResult> wifiList;
+   private ScanResult wifisObj[];
+   @SuppressLint("NewApi")
+@Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
+      if (android.os.Build.VERSION.SDK_INT > 9) {
+          StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+          StrictMode.setThreadPolicy(policy);
+        }
       setContentView(R.layout.activity_main);
       lv=(ListView)findViewById(R.id.listView);
       wifi=(WifiManager)getSystemService(Context.WIFI_SERVICE);
@@ -52,21 +57,6 @@ public class MainActivity extends Activity  {
    protected void onResume() {
       registerReceiver(wifiReciever, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
       super.onResume();
-   }
-   
-   @Override
-   public boolean onOptionsItemSelected(MenuItem item) {
-      // Handle action bar item clicks here. The action bar will
-      // automatically handle clicks on the Home/Up button, so long
-      // as you specify a parent activity in AndroidManifest.xml.
-      
-      int id = item.getItemId();
-      
-      //noinspection SimplifiableIfStatement
-      if (id == R.id.action_settings) {
-         return true;
-      }
-      return super.onOptionsItemSelected(item);
    }
    
    private class WifiScanReceiver extends BroadcastReceiver{
