@@ -12,6 +12,8 @@ import org.apache.http.util.EntityUtils;
 
 import com.example.wifidemo.R;
 
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -25,7 +27,9 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.SyncStateContract.Constants;
+import android.support.v4.app.NavUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -46,32 +50,31 @@ public class ConnectionActivity extends Activity {
 	private TextView response;
 	private Button testPW;
 	private String MAC_ADDRESS;
+	
+	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*DrawView d = new DrawView(this);
-		Canvas canvas = new Canvas(); 
-		d.onDraw(canvas);
-		MainLayout.addView(d);*/
 		setContentView(R.layout.activity_connection);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
-	    
 		tv1 = (TextView)findViewById(R.id.tv1);
 		tv2 = (TextView)findViewById(R.id.tv2);
 		tv3 = (TextView)findViewById(R.id.tv3);
 		response = (TextView)findViewById(R.id.response);
 		testPW = (Button)findViewById(R.id.manufacturer_button);
-		MAC_ADDRESS = getMacAddress();
-		tv3.setText("MAC_ADDRESS " + MAC_ADDRESS);
+		//MAC_ADDRESS = getMacAddress();
+		//tv3.setText("MAC_ADDRESS " + MAC_ADDRESS);
 		
 		
 		
 		Bundle b = this.getIntent().getExtras();
 		if(b!=null) {
 			CurrentScanResult = b.getParcelable(Constants.DATA);
-			tv1.setText("SSID: " + CurrentScanResult.SSID.toString());
-			SSID = CurrentScanResult.SSID.toString();
-			tv2.setText("Capabilities: " + CurrentScanResult.capabilities.toString());
+			tv1.setText("MAC_ADDRESS: " + CurrentScanResult.BSSID.toString());
+			MAC_ADDRESS = CurrentScanResult.BSSID.toString();
+			//SSID = CurrentScanResult.SSID.toString();
+			//tv2.setText("Capabilities: " + CurrentScanResult.capabilities.toString());
 		}
 		
 		testPW.setOnClickListener( new OnClickListener () {
@@ -106,6 +109,18 @@ public class ConnectionActivity extends Activity {
 			}
 		});
 	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	    // Respond to the action bar's Up/Home button
+	    case android.R.id.home:
+	        NavUtils.navigateUpFromSameTask(this);
+	        return true;
+	    }
+	    return super.onOptionsItemSelected(item);
+	}
+	
 	private String getMacAddress() {
 		// get the MAC address
 		WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
