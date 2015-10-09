@@ -28,13 +28,13 @@ public class HTTPHelper {
 		String pw = getPassword();
 		String u = getUsername();
 		URL obj = new URL(url);
+		
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 		String userCredentials = u+":"+pw;
 		String basicAuth = "Basic " + new String(Base64.encode(userCredentials.getBytes(), 0));
 		con.setRequestProperty ("Authorization", basicAuth);
 		con.setRequestMethod("GET");
 		int responseCode = con.getResponseCode();
-		Log.d(DEBUG, responseCode+"");
 		return responseCode;
 	}
 	

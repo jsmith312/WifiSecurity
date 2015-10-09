@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -23,14 +24,17 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import com.example.wifidemo.R;
 
 public class MainActivity extends Activity  {
    private ListView lv;
    private WifiManager wifi;
    private String wifis[];
+   TextView tv1;
    private WifiScanReceiver wifiReciever;
    private List<ScanResult> wifiList;
    private ScanResult wifisObj[];
@@ -43,10 +47,15 @@ public class MainActivity extends Activity  {
           StrictMode.setThreadPolicy(policy);
         }
       setContentView(R.layout.activity_main);
-      lv=(ListView)findViewById(R.id.listView);
+      tv1 = (TextView)findViewById(R.id.textview);
+      //lv=(ListView)findViewById(R.id.listView);
       wifi=(WifiManager)getSystemService(Context.WIFI_SERVICE);
-      wifiReciever = new WifiScanReceiver();
-      wifi.startScan();
+      WifiInfo info = wifi.getConnectionInfo();
+      tv1.setText(info.getSSID());
+      tv1.setText(info.getMacAddress());
+      
+      //wifiReciever = new WifiScanReceiver();
+      //wifi.startScan();
    }
    
    protected void onPause() {
@@ -59,7 +68,7 @@ public class MainActivity extends Activity  {
       super.onResume();
    }
    
-   private class WifiScanReceiver extends BroadcastReceiver{
+   private class WifiScanReceiver extends BroadcastReceiver {
       public void onReceive(Context c, Intent intent) {
          List<ScanResult> wifiList = wifi.getScanResults();
          wifis = new String[wifiList.size()];
