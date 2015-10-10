@@ -30,6 +30,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.RectF;
+import android.net.DhcpInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -38,6 +39,7 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.provider.SyncStateContract.Constants;
 import android.support.v4.app.NavUtils;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,6 +50,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.OutputStreamWriter;
 import java.io.BufferedWriter;
@@ -63,7 +66,9 @@ public class ConnectionActivity extends Activity {
 	private TextView response;
 	private Button getManufacturer;
 	private String MAC_ADDRESS;
+	private DhcpInfo d;
 	private WifiManager wifi;
+	private String gatewayIP;
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -81,12 +86,25 @@ public class ConnectionActivity extends Activity {
 		getManufacturer = (Button)findViewById(R.id.manufacturer_button);
 		
 		wifi=(WifiManager)getSystemService(Context.WIFI_SERVICE);
+		d=wifi.getDhcpInfo();
+
+        /*String s_dns1="DNS 1: "+String.valueOf(d.dns1);
+        String s_dns2="DNS 2: "+String.valueOf(d.dns2);    
+        String s_gateway="Default Gateway: "+String.valueOf(d.gateway);    
+        String s_ipAddress="IP Address: "+String.valueOf(d.ipAddress); 
+        String s_leaseDuration="Lease Time: "+String.valueOf(d.leaseDuration);     
+        String s_netmask="Subnet Mask: "+String.valueOf(d.netmask);    
+        String s_serverAddress="Server IP: "+String.valueOf(d.serverAddress);*/
+        gatewayIP = FormatIP(d.gateway);
+        
+        //tv1.setText("Network Info\n"+s_dns1+"\n"+s_dns2+"\n"+s_gateway+"\n"+s_ipAddress+"\n"+s_leaseDuration+"\n"+s_netmask+"\n"+s_serverAddress);
+        tv1.setText(gatewayIP);
 	    WifiInfo info = wifi.getConnectionInfo();
-	    int addr = info.getIpAddress();
 	    SSID = info.getSSID().toString();
 	    MAC_ADDRESS = info.getBSSID();
+	    
 	    Log.d(DEBUG, info.getMacAddress());
-	    HTTPHelper http = new HTTPHelper("admin", "password", "http://192.168.1.1/*");
+	    HTTPHelper http = new HTTPHelper("admin", "password", "http://"+gatewayIP);
 	    try {
 			http.getResponse();
 		} catch (Exception e) {
@@ -106,7 +124,7 @@ public class ConnectionActivity extends Activity {
 				    //tv2.setText("RESPONSE:" + responseString);
 				    String jsonObj = responseString.substring(1,responseString.length()-1);
 				    JSONObject result = new JSONObject(jsonObj);
-				    String company =result.getString("company"); 
+				    String company =result.getString("company");
 				    Log.d(DEBUG, responseString.toString());
 				    Log.d(DEBUG, company);
 				    tv1.setText(company);
@@ -123,15 +141,17 @@ public class ConnectionActivity extends Activity {
 				
 				// replace the first 2 parameters with the API call that will 
 				// send back the username and password. Once server is setup.
-				HTTPHelper http = new HTTPHelper("admin", "password", "http://192.168.1.1/*");
+				HTTPHelper http = new HTTPHelper("admin", "password", "http://"+gatewayIP);
 				try {
 					int resp = http.getResponse();
 					Log.d(DEBUG, resp+"");
 					if (resp == 401) {
-						tv3.setText("No default password");
+						Toast.makeText(getApplicationContext(), "Not using default password",
+								   Toast.LENGTH_LONG).show();
 						setLog(0);
 					} else {
-						tv3.setText("Still using default password!");
+						Toast.makeText(getApplicationContext(), "Still using default password",
+								   Toast.LENGTH_LONG).show();
 						setLog(1);
 					}
 				} catch (Exception e) {
@@ -162,20 +182,21 @@ public class ConnectionActivity extends Activity {
 		LOG.append(SSID+" ");
 		LOG.append(MAC_ADDRESS);
 		LOG.append(" default_pw:" + response);
+		tv3.setText(LOG);
 		//WriteLogFile(LOG);
-		//Log.d(DEBUG, LOG.toString());
+		Log.d(DEBUG, LOG.toString());
 	}
 	
 	private void WriteLogFile(StringBuffer Log) {
 		String eol = System.getProperty("line.separator");
-		/*try {
+		try {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 					openFileOutput("LOG", MODE_WORLD_WRITEABLE)));
 			writer.write(Log.append(eol).toString());
 			writer.close();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}*/
+		}
 		
 		try {
 			BufferedReader input = new BufferedReader(new InputStreamReader(openFileInput("LOG")));
@@ -193,11 +214,7 @@ public class ConnectionActivity extends Activity {
 		}
 	}
 	
-	private String getMacAddress() {
-		// get the MAC address
-		WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-		WifiInfo wInfo = wifiManager.getConnectionInfo();
-		String macAddress = wInfo.getBSSID();
-		return macAddress;
+	private String FormatIP(int IpAddress) {
+	    return Formatter.formatIpAddress(IpAddress);
 	}
 }
