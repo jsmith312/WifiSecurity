@@ -38,6 +38,8 @@ public class ConnectionActivity extends Activity {
 	private TextView tv3;
 	private TextView response;
 	private Button getManufacturer;
+	private Button logInfo;
+	private Button sendLogInfo;
 	private String MAC_ADDRESS;
 	private DhcpInfo d;
 	private WifiManager wifi;
@@ -57,10 +59,17 @@ public class ConnectionActivity extends Activity {
 		setContentView(R.layout.activity_connection);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
+		// Text Views 
 		tv1 = (TextView)findViewById(R.id.tv1);
 		tv2 = (TextView)findViewById(R.id.tv2);
 		tv3 = (TextView)findViewById(R.id.tv3);
+		
+		// Buttons 
 		getManufacturer = (Button)findViewById(R.id.manufacturer_button);
+		logInfo = (Button)findViewById(R.id.log_info);
+		sendLogInfo = (Button)findViewById(R.id.send_log_info);
+		
+		// Network 
 		connMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 	    networkInfo = connMgr.getActiveNetworkInfo();
 	    
@@ -69,14 +78,15 @@ public class ConnectionActivity extends Activity {
         	wifi=(WifiManager)getSystemService(Context.WIFI_SERVICE);
     		d=wifi.getDhcpInfo();
             gatewayIP = FormatIP(d.gateway);
-            tv1.setText(gatewayIP);
             WifiInfo info = wifi.getConnectionInfo();
     	    SSID = info.getSSID().toString();
     	    Log.d(DEBUG, info.getMacAddress());
     	    MAC_ADDRESS = info.getBSSID();
-    	    httpHelper = new HTTPHelper("admin", "password", "http://"+gatewayIP, MAC_ADDRESS);
+    	    httpHelper = new HTTPHelper("admin", "password", "http://"+gatewayIP, 
+    	    		MAC_ADDRESS, getApplicationContext());
     	    try {
-    	    	httpHelper.getResponse();
+    	    	int response = httpHelper.getResponse();
+    	    	Log.d(DEBUG, response+"");
     		} catch (Exception e) {
     			// TODO Auto-generated catch block
     			e.printStackTrace();

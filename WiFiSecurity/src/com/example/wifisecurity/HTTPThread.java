@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 @SuppressWarnings("deprecation")
 public class HTTPThread extends AsyncTask<HTTPHelper, Void, String> {
@@ -62,16 +63,20 @@ public class HTTPThread extends AsyncTask<HTTPHelper, Void, String> {
 				int resp = httpHelper.getResponse();
 				Log.d(DEBUG, "USER:" + httpHelper.getUsername() + " PASS: " + httpHelper.getPassword());
 				Log.d(DEBUG, "USER:" + user + " PASS: " + pass + " RESPONSE "+resp);
-				/*if (resp == 401) {
-					Toast.makeText(getApplicationContext(), "Not using default password",
+				if (resp != 401) {
+					Toast.makeText(httpHelper.getContext(), "Using default password!",
 							   Toast.LENGTH_LONG).show();
-					setLog(0);
-				} else {
+					return null;
+					//setLog(0);
+				} /*else {
 					Toast.makeText(getApplicationContext(), "Still using default password",
 							   Toast.LENGTH_LONG).show();
-					setLog(1);
+					//setLog(1);
 				}*/
 			}
+			Toast.makeText(httpHelper.getContext(), "Not using default password",
+					   Toast.LENGTH_LONG).show();
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

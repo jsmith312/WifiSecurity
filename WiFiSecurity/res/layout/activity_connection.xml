@@ -14,24 +14,6 @@
         android:layout_height="wrap_content"
         android:text="SSID" />
 
-    <Button
-        android:id="@+id/default_pw_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="115dp"
-        android:text="Test Default PW" />
-    
-    <Button
-        android:id="@+id/manufacturer_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="115dp"
-        android:text="Get maufacturer" />
-
     <TextView
         android:id="@+id/tv2"
         android:layout_width="wrap_content"
@@ -49,5 +31,34 @@
         android:layout_below="@+id/tv1"
         android:layout_marginTop="29dp"
         android:text="" />
+    
+    
+    
+    <Button
+        android:id="@+id/send_log_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="150dp"
+        android:text="Send log info" />
+    
+    <Button
+        android:id="@+id/log_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="100dp"
+        android:text="Show log info" />
+    
+    <Button
+        android:id="@+id/manufacturer_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="50dp"
+        android:text="Get maufacturer" />
 
 </RelativeLayout>
