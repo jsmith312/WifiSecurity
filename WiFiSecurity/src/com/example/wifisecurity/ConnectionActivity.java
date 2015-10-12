@@ -37,7 +37,7 @@ public class ConnectionActivity extends Activity {
 	private TextView tv2;
 	private TextView tv3;
 	private TextView response;
-	private Button getManufacturer;
+	private Button TestDefaultPass;
 	private Button logInfo;
 	private Button sendLogInfo;
 	private String MAC_ADDRESS;
@@ -47,6 +47,7 @@ public class ConnectionActivity extends Activity {
 	private String gatewayIP;
 	private NetworkInfo networkInfo;
 	private ConnectivityManager connMgr;
+	private StringBuffer LOG;
 	
 	@SuppressLint("NewApi")	
 	@Override
@@ -58,6 +59,7 @@ public class ConnectionActivity extends Activity {
 	        }
 		setContentView(R.layout.activity_connection);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		LOG = new StringBuffer();
 		
 		// Text Views 
 		tv1 = (TextView)findViewById(R.id.tv1);
@@ -65,7 +67,7 @@ public class ConnectionActivity extends Activity {
 		tv3 = (TextView)findViewById(R.id.tv3);
 		
 		// Buttons 
-		getManufacturer = (Button)findViewById(R.id.manufacturer_button);
+		TestDefaultPass = (Button)findViewById(R.id.default_pass_button);
 		logInfo = (Button)findViewById(R.id.log_info);
 		sendLogInfo = (Button)findViewById(R.id.send_log_info);
 		
@@ -78,8 +80,10 @@ public class ConnectionActivity extends Activity {
         	wifi=(WifiManager)getSystemService(Context.WIFI_SERVICE);
     		d=wifi.getDhcpInfo();
             gatewayIP = FormatIP(d.gateway);
+            tv3.setText("Default Gateway: " + gatewayIP);
             WifiInfo info = wifi.getConnectionInfo();
     	    SSID = info.getSSID().toString();
+    	    tv1.setText("SSID: " + SSID);
     	    //Log.d(DEBUG, info.getMacAddress());
     	    MAC_ADDRESS = info.getBSSID();
     	    httpHelper = new HTTPHelper("", "", "http://"+gatewayIP, 
@@ -97,11 +101,12 @@ public class ConnectionActivity extends Activity {
 	}
 	
 	public void sendLogInfo(View view) {
-		
+		// Send to server when available
+		tv2.setText("");
 	}
 	
 	public void showLogInfo(View view) {
-		tv3.setText("YO");
+		tv2.setText(LOG);
 	}
 	
 	public void TestPW(View view) {
@@ -109,7 +114,7 @@ public class ConnectionActivity extends Activity {
 			HTTPThread thread = new HTTPThread();
 			thread.execute(httpHelper);
 			try {
-				tv1.setText(thread.get()+"");
+				//tv1.setText(thread.get()+"");
 				setLog(thread.get());
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -124,14 +129,13 @@ public class ConnectionActivity extends Activity {
 	 }
 		
 	private void setLog(boolean response) {
-		StringBuffer LOG = new StringBuffer();
 		Date d = new Date();
 		LOG.append("[");
 		LOG.append(new Timestamp(d.getTime()));
 		LOG.append("]: ");
 		LOG.append(SSID+" ");
 		LOG.append(MAC_ADDRESS);
-		LOG.append(" default_pw:" + response);
+		LOG.append(" default_pw:" + response+"\n");
 		//WriteLogFile(LOG);
 		Log.d(DEBUG, LOG.toString());
 	}

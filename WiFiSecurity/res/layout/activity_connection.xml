@@ -12,7 +12,7 @@
         android:id="@+id/tv1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Company: " />
+        android:text="SSID: " />
 
     <TextView
         android:id="@+id/tv2"
@@ -20,8 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/tv3"
         android:layout_below="@+id/tv3"
-        android:layout_marginTop="19dp"
-        android:text="Default Gateway: " />
+        android:layout_marginTop="19dp"/>
 
     <TextView
         android:id="@+id/tv3"
@@ -29,7 +28,8 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/tv1"
         android:layout_below="@+id/tv1"
-        android:layout_marginTop="29dp"/>
+        android:layout_marginTop="29dp"
+        android:text="Default Gateway: "/>
     
     <Button
         android:id="@+id/send_log_info"
@@ -52,13 +52,13 @@
         android:onClick="showLogInfo"/>
     
     <Button
-        android:id="@+id/manufacturer_button"
+        android:id="@+id/default_pass_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="50dp"
-        android:text="Get maufacturer" 
+        android:text="Test security" 
         android:onClick="TestPW"/>
 
 </RelativeLayout>
