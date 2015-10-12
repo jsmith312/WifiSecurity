@@ -6,13 +6,13 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.wifisecurity.ConnectionActivity" >
+    tools:context="com.example.wifisecurity.ConnectionActivity">
     
     <TextView
         android:id="@+id/tv1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SSID" />
+        android:text="Company: " />
 
     <TextView
         android:id="@+id/tv2"
@@ -21,7 +21,7 @@
         android:layout_alignLeft="@+id/tv3"
         android:layout_below="@+id/tv3"
         android:layout_marginTop="19dp"
-        android:text="" />
+        android:text="Default Gateway: " />
 
     <TextView
         android:id="@+id/tv3"
@@ -29,10 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/tv1"
         android:layout_below="@+id/tv1"
-        android:layout_marginTop="29dp"
-        android:text="" />
-    
-    
+        android:layout_marginTop="29dp"/>
     
     <Button
         android:id="@+id/send_log_info"
@@ -41,7 +38,8 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="150dp"
-        android:text="Send log info" />
+        android:text="Send log info" 
+        android:onClick="sendLogInfo" />
     
     <Button
         android:id="@+id/log_info"
@@ -50,7 +48,8 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="100dp"
-        android:text="Show log info" />
+        android:text="Show log info" 
+        android:onClick="showLogInfo"/>
     
     <Button
         android:id="@+id/manufacturer_button"
@@ -59,6 +58,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="50dp"
-        android:text="Get maufacturer" />
+        android:text="Get maufacturer" 
+        android:onClick="TestPW"/>
 
 </RelativeLayout>

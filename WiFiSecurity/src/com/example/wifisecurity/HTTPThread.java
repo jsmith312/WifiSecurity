@@ -18,13 +18,21 @@ import android.util.Log;
 import android.widget.Toast;
 
 @SuppressWarnings("deprecation")
-public class HTTPThread extends AsyncTask<HTTPHelper, Void, String> {
+public class HTTPThread extends AsyncTask<HTTPHelper, Void, Boolean> {
 	private HTTPHelper httpHelper; 
 	private String DEBUG = "DEBUG";
-	private String JSONDATA = "{test:[{\"user\":\"admin\",\"pass\": \"password\"}, "
-			+ "{\"user\":\"user\",\"pass\": \"user\"}]}";
+	private boolean hasDefaultPW = false;
 	
-	protected String doInBackground(HTTPHelper... params) {
+	private String JSONDATA = "{test:[{\"user\":\"user\",\"pass\": \"password\"}, "
+			+ "{\"user\":\"user\",\"pass\": \"user\"},"
+			+ "{\"user\":\"\",\"pass\": \"\"},"
+			+ "{\"user\":\"admin\",\"pass\": \"1234\"},"
+			+ "{\"user\":\"root\",\"pass\": \"admin\"},"
+			+ "{\"user\":\"admin\",\"pass\": \"password\"},"
+			+ "{\"user\":\"\",\"pass\": \"password\"}"
+			+ "]}";
+	
+	protected Boolean doInBackground(HTTPHelper... params) {
 		// TODO Auto-generated method stub
 		httpHelper = params[0];
 		HttpClient httpClient = new DefaultHttpClient();
@@ -64,24 +72,24 @@ public class HTTPThread extends AsyncTask<HTTPHelper, Void, String> {
 				Log.d(DEBUG, "USER:" + httpHelper.getUsername() + " PASS: " + httpHelper.getPassword());
 				Log.d(DEBUG, "USER:" + user + " PASS: " + pass + " RESPONSE "+resp);
 				if (resp != 401) {
-					Toast.makeText(httpHelper.getContext(), "Using default password!",
-							   Toast.LENGTH_LONG).show();
-					return null;
-					//setLog(0);
-				} /*else {
-					Toast.makeText(getApplicationContext(), "Still using default password",
-							   Toast.LENGTH_LONG).show();
-					//setLog(1);
-				}*/
+					return true; // has default pw
+				} 
 			}
-			Toast.makeText(httpHelper.getContext(), "Not using default password",
-					   Toast.LENGTH_LONG).show();
-			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return DEBUG;
+		return false;
 	}
-
+	
+	protected void onPostExecute(Boolean result) {
+        // This is executed in main Thread, use the result
+		if(result == true) {
+			Toast.makeText(httpHelper.getContext(), "Using default password",
+				   Toast.LENGTH_LONG).show();
+		} else {
+			Toast.makeText(httpHelper.getContext(), "Not using default password",
+					   Toast.LENGTH_LONG).show();	
+		}
+    }
 }

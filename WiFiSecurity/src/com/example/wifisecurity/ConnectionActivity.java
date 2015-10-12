@@ -2,7 +2,7 @@ package com.example.wifisecurity;
 
 import java.sql.Timestamp;
 import java.util.Date;
-
+import java.util.concurrent.ExecutionException;
 import java.io.InputStreamReader;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
@@ -80,13 +80,13 @@ public class ConnectionActivity extends Activity {
             gatewayIP = FormatIP(d.gateway);
             WifiInfo info = wifi.getConnectionInfo();
     	    SSID = info.getSSID().toString();
-    	    Log.d(DEBUG, info.getMacAddress());
+    	    //Log.d(DEBUG, info.getMacAddress());
     	    MAC_ADDRESS = info.getBSSID();
-    	    httpHelper = new HTTPHelper("admin", "password", "http://"+gatewayIP, 
+    	    httpHelper = new HTTPHelper("", "", "http://"+gatewayIP, 
     	    		MAC_ADDRESS, getApplicationContext());
     	    try {
     	    	int response = httpHelper.getResponse();
-    	    	Log.d(DEBUG, response+"");
+    	    	//Log.d(DEBUG, response+"");
     		} catch (Exception e) {
     			// TODO Auto-generated catch block
     			e.printStackTrace();
@@ -94,20 +94,36 @@ public class ConnectionActivity extends Activity {
         } else {
         	tv1.setText("No network connection available.");
         }
-	    
-	    getManufacturer.setOnClickListener( new OnClickListener () {
-			@Override
-			public void onClick(View v) {
-				if (networkInfo != null && networkInfo.isConnected()) {
-					new HTTPThread().execute(httpHelper);
-				} else {
-		        	tv1.setText("No network connection available.");
-		        }	
-			}
-		});
 	}
 	
-	private void setLog(int response) {
+	public void sendLogInfo(View view) {
+		
+	}
+	
+	public void showLogInfo(View view) {
+		tv3.setText("YO");
+	}
+	
+	public void TestPW(View view) {
+		if (networkInfo != null && networkInfo.isConnected()) {
+			HTTPThread thread = new HTTPThread();
+			thread.execute(httpHelper);
+			try {
+				tv1.setText(thread.get()+"");
+				setLog(thread.get());
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+        	tv1.setText("No network connection available.");
+        }
+	 }
+		
+	private void setLog(boolean response) {
 		StringBuffer LOG = new StringBuffer();
 		Date d = new Date();
 		LOG.append("[");
@@ -116,7 +132,6 @@ public class ConnectionActivity extends Activity {
 		LOG.append(SSID+" ");
 		LOG.append(MAC_ADDRESS);
 		LOG.append(" default_pw:" + response);
-		tv3.setText(LOG);
 		//WriteLogFile(LOG);
 		Log.d(DEBUG, LOG.toString());
 	}
@@ -139,7 +154,7 @@ public class ConnectionActivity extends Activity {
 			while ((line = input.readLine()) != null) {
 				buffer.append(line + eol);
 			}
-			TextView textView = (TextView) findViewById(R.id.tv3);
+			TextView textView = (TextView) findViewById(R.id.tv3 );
 				if (textView == null) {
 			}
 			textView.setText(buffer.toString());
