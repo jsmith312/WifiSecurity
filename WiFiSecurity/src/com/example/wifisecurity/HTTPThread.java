@@ -1,18 +1,22 @@
 package com.example.wifisecurity;
 
 import java.io.IOException;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -22,16 +26,9 @@ public class HTTPThread extends AsyncTask<HTTPHelper, Void, Boolean> {
 	private HTTPHelper httpHelper; 
 	private String DEBUG = "DEBUG";
 	private boolean hasDefaultPW = false;
+	private String Company;
 	
-	private String JSONDATA = "{test:[{\"user\":\"user\",\"pass\": \"password\"}, "
-			+ "{\"user\":\"user\",\"pass\": \"user\"},"
-			+ "{\"user\":\"\",\"pass\": \"\"},"
-			+ "{\"user\":\"admin\",\"pass\": \"1234\"},"
-			+ "{\"user\":\"root\",\"pass\": \"admin\"},"
-			+ "{\"user\":\"admin\",\"pass\": \"password\"},"
-			+ "{\"user\":\"\",\"pass\": \"password\"}"
-			+ "]}";
-	
+	@SuppressLint("NewApi")
 	protected Boolean doInBackground(HTTPHelper... params) {
 		// TODO Auto-generated method stub
 		httpHelper = params[0];
@@ -43,9 +40,9 @@ public class HTTPThread extends AsyncTask<HTTPHelper, Void, Boolean> {
 		    String responseString = EntityUtils.toString(entity, "UTF-8");
 		    String jsonObj = responseString.substring(1,responseString.length()-1);
 		    JSONObject result = new JSONObject(jsonObj);
-		    String company =result.getString("company");
+		    Company =result.getString("company");
 		    Log.d(DEBUG, responseString.toString());
-		    Log.d(DEBUG, company);
+		    Log.d(DEBUG, Company);
 		} catch (ClientProtocolException e) {
 		    // Log exception
 		    e.printStackTrace();
@@ -60,7 +57,17 @@ public class HTTPThread extends AsyncTask<HTTPHelper, Void, Boolean> {
 		// replace the first 2 parameters with the API call that will 
 		// send back the username and password. Once server is setup.
 		try {
-			JSONObject dataresult = new JSONObject(JSONDATA);
+			HttpClient httpClient2 = new DefaultHttpClient();
+			HttpPost post2 = new HttpPost("http://52.89.45.40/routepass.py");
+			List<NameValuePair> arguments = new ArrayList<NameValuePair>();
+	        arguments.add(new BasicNameValuePair("manufacturer", Company));
+	        post2.setEntity(new UrlEncodedFormEntity(arguments));
+			
+	        HttpResponse response2 = httpClient2.execute(post2);
+		    HttpEntity entity2 = response2.getEntity();
+		    String responseString2 = EntityUtils.toString(entity2, "UTF-8");
+		    Log.d(DEBUG, responseString2.toString());
+			JSONObject dataresult = new JSONObject(responseString2);
 			JSONArray arr = dataresult.getJSONArray("test");
 			for (int i = 0; i < arr.length(); i++) {
 				JSONObject up = arr.getJSONObject(i);

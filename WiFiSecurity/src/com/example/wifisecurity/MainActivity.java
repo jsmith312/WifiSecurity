@@ -1,93 +1,187 @@
 package com.example.wifisecurity;
 
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.io.InputStreamReader;
+import java.io.BufferedWriter;
+import java.io.BufferedReader;
+import java.io.OutputStreamWriter;
+
+import com.example.wifidemo.R;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Color;
-import android.net.wifi.ScanResult;
+import android.net.ConnectivityManager;
+import android.net.DhcpInfo;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.provider.SyncStateContract.Constants;
-import android.view.Menu;
+import android.support.v4.app.NavUtils;
+import android.text.format.Formatter;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
-import java.util.ArrayList;
-import java.util.List;
 
-import com.example.wifidemo.R;
-
-public class MainActivity extends Activity  {
-   private ListView lv;
-   private WifiManager wifi;
-   private String wifis[];
-   TextView tv1;
-   private WifiScanReceiver wifiReciever;
-   private List<ScanResult> wifiList;
-   private ScanResult wifisObj[];
-   @SuppressLint("NewApi")
-@Override
-   protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
-      if (android.os.Build.VERSION.SDK_INT > 9) {
-          StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-          StrictMode.setThreadPolicy(policy);
+public class MainActivity extends Activity {
+	protected static final String DEBUG = "RESPONSE CODE";
+	private String SSID;
+	private TextView tv1;
+	private TextView tv2;
+	private TextView tv3;
+	private TextView response;
+	private Button TestDefaultPass;
+	private Button logInfo;
+	private Button sendLogInfo;
+	private String MAC_ADDRESS;
+	private DhcpInfo d;
+	private WifiManager wifi;
+	private HTTPHelper httpHelper;
+	private String gatewayIP;
+	private NetworkInfo networkInfo;
+	private ConnectivityManager connMgr;
+	private String LOG_INFO;
+	
+	@SuppressLint("NewApi")	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		if (android.os.Build.VERSION.SDK_INT > 9) {
+	          StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+	          StrictMode.setThreadPolicy(policy);
+	        }
+		setContentView(R.layout.activity_connection);
+		//getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		// Text Views 
+		tv1 = (TextView)findViewById(R.id.tv1);
+		tv2 = (TextView)findViewById(R.id.tv2);
+		tv3 = (TextView)findViewById(R.id.tv3);
+		
+		// Buttons 
+		TestDefaultPass = (Button)findViewById(R.id.default_pass_button);
+		logInfo = (Button)findViewById(R.id.log_info);
+		sendLogInfo = (Button)findViewById(R.id.send_log_info);
+		
+		// Network 
+		connMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+	    networkInfo = connMgr.getActiveNetworkInfo();
+	    
+	    // ensure network connection
+        if (networkInfo != null && networkInfo.isConnected()) {
+        	wifi=(WifiManager)getSystemService(Context.WIFI_SERVICE);
+    		d=wifi.getDhcpInfo();
+            gatewayIP = FormatIP(d.gateway);
+            tv3.setText("Default Gateway: " + gatewayIP);
+            WifiInfo info = wifi.getConnectionInfo();
+    	    SSID = info.getSSID().toString();
+    	    tv1.setText("SSID: " + SSID);
+    	    //Log.d(DEBUG, info.getMacAddress());
+    	    MAC_ADDRESS = info.getBSSID();
+    	    httpHelper = new HTTPHelper("", "", "http://"+gatewayIP, 
+    	    		MAC_ADDRESS, getApplicationContext());
+    	    try {
+    	    	int response = httpHelper.getResponse();
+    	    	//Log.d(DEBUG, response+"");
+    		} catch (Exception e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+        } else {
+        	tv1.setText("No network connection available.");
         }
-      setContentView(R.layout.activity_main);
-      tv1 = (TextView)findViewById(R.id.textview);
-      //lv=(ListView)findViewById(R.id.listView);
-      wifi=(WifiManager)getSystemService(Context.WIFI_SERVICE);
-      WifiInfo info = wifi.getConnectionInfo();
-      tv1.setText(info.getSSID());
-      tv1.setText(info.getMacAddress());
-      
-      //wifiReciever = new WifiScanReceiver();
-      //wifi.startScan();
-   }
-   
-   protected void onPause() {
-      unregisterReceiver(wifiReciever);
-      super.onPause();
-   }
-   
-   protected void onResume() {
-      registerReceiver(wifiReciever, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-      super.onResume();
-   }
-   
-   private class WifiScanReceiver extends BroadcastReceiver {
-      public void onReceive(Context c, Intent intent) {
-         List<ScanResult> wifiList = wifi.getScanResults();
-         wifis = new String[wifiList.size()];
-         wifisObj = new ScanResult[wifiList.size()]; 
-         for(int i = 0; i < wifiList.size(); i++){
-            wifis[i] = ((wifiList.get(i).SSID).toString());
-            wifisObj[i] = wifiList.get(i);
-         }
-         lv.setAdapter(new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,wifis));
-         lv.setOnItemClickListener(new OnItemClickListener() {
- 			public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
- 				Intent intent = new Intent(MainActivity.this, ConnectionActivity.class);
- 				Bundle bundle = new Bundle();
- 				bundle.putParcelable(Constants.DATA, wifisObj[position]);
- 				intent.putExtras(bundle);
- 				intent.putExtras(bundle);
- 				startActivity(intent);
- 			}
- 		});
-      }
-   }
+	}
+	
+	public void sendLogInfo(View view) {
+		// Send to server when available
+		tv2.setText("");
+	}
+	
+	public void showLogInfo(View view) {
+		tv2.setText(LOG_INFO);
+	}
+	
+	public void TestPW(View view) {
+		if (networkInfo != null && networkInfo.isConnected()) {
+			HTTPThread thread = new HTTPThread();
+			thread.execute(httpHelper);
+			try {
+				setLog(thread.get());
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+        	tv1.setText("No network connection available.");
+        }
+	 }
+		
+	private void setLog(boolean response) {
+		Date d = new Date();
+		StringBuffer LOG = new StringBuffer(); 
+		LOG.append("[");
+		LOG.append(new Timestamp(d.getTime()));
+		LOG.append("]: ");
+		LOG.append(SSID+" ");
+		LOG.append(MAC_ADDRESS);
+		LOG.append(" default_pw:" + response+"\n");
+		LOG_INFO = LOG.toString();
+		WriteLogFile(LOG);
+		Log.d(DEBUG, LOG.toString());
+	}
+	
+	private void WriteLogFile(StringBuffer Log) {
+		String eol = System.getProperty("line.separator");
+		try {
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+					openFileOutput("LOG", MODE_WORLD_WRITEABLE)));
+			writer.write(Log.append(eol).toString());
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void ReadLogFile() {
+		String eol = System.getProperty("line.separator");
+		try {
+			BufferedReader input = new BufferedReader(new InputStreamReader(openFileInput("LOG")));
+			String line;
+			StringBuffer buffer = new StringBuffer();
+			while ((line = input.readLine()) != null) {
+				buffer.append(line + eol);
+			}
+			TextView textView = (TextView) findViewById(R.id.tv3 );
+				if (textView == null) {
+			}
+			textView.setText(buffer.toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private String FormatIP(int IpAddress) {
+	    return Formatter.formatIpAddress(IpAddress);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	    // Respond to the action bar's Up/Home button
+	    case android.R.id.home:
+	        NavUtils.navigateUpFromSameTask(this);
+	        return true;
+	    }
+	    return super.onOptionsItemSelected(item);
+	}
 }
