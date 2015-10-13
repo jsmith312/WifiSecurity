@@ -36,7 +36,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tv3"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="75dp"
         android:gravity="center"
         android:hint="Username"/>
     
@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_below="@+id/tv3"
-        android:layout_marginTop="150dp"
+        android:layout_marginTop="125dp"
         android:hint="Password"/>
     
     <Button
@@ -56,6 +56,15 @@
         android:layout_below="@+id/pass"
         android:text="Set user/pass" 
         android:onClick="setUserPass" />
+    
+    <Button
+        android:id="@+id/test_pw"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/pass"
+        android:layout_alignRight="@+id/pass"
+        android:text="Test user/pass" 
+        android:onClick="testUserPass" />
     
     <Button
         android:id="@+id/send_log_info"
@@ -84,7 +93,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="50dp"
-        android:text="Test security" 
+        android:text="Find Default Credentials" 
         android:onClick="TestPW"/>
 
 </RelativeLayout>

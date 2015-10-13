@@ -51,7 +51,8 @@ public class MainActivity extends Activity {
 	private String gatewayIP;
 	private NetworkInfo networkInfo;
 	private ConnectivityManager connMgr;
-	private String LOG_INFO;
+	private StringBuffer LOG_INFO;
+	private String Company;
 	private Reporter rep;
 	private EditText user;
 	private EditText pass;
@@ -122,6 +123,7 @@ public class MainActivity extends Activity {
 	
 	public void sendLogInfo(View view) {
 		// Send to server when available
+		WriteLogFile(LOG_INFO);
 		tv2.setText("");
 	}
 	
@@ -129,7 +131,7 @@ public class MainActivity extends Activity {
 		tv2.setText(LOG_INFO);
 	}
 	
-	public void TestPW(View view) {
+	public void testUserPass(View view) {
 		if (networkInfo != null && networkInfo.isConnected()) {
 			if (!user.getText().toString().matches("") && 
 					!user.getText().toString().matches("")) {
@@ -144,7 +146,8 @@ public class MainActivity extends Activity {
 	    	    	} else {
 	    	    		Toast.makeText(getApplicationContext(), "Correct password",
 								   Toast.LENGTH_LONG).show();
-	    	    		tv3.setText("username: " + user.getText().toString() + "\n" +
+	    	    		tv3.setText("Company: " + Company + "\n" +
+	    	    				"username: " + user.getText().toString() + "\n" +
 								"password: " + pass.getText().toString() + "\n");
 	    	    		setLog(true);
 	    	    	}
@@ -154,19 +157,26 @@ public class MainActivity extends Activity {
 	    		}
 				user.setText("");
 				pass.setText("");
-			}	else {
-				HTTPThread thread = new HTTPThread();
-				thread.execute(httpHelper);
-				try {
+			}
+		} else {
+        	tv1.setText("No network connection available.");
+        }
+	}
+	
+	public void TestPW(View view) {
+		if (networkInfo != null && networkInfo.isConnected()) {
+			HTTPThread thread = new HTTPThread();
+			thread.execute(httpHelper);
+			try {
 					rep = thread.get();
 					if(rep.getHasDefaultPassword() == true) {
-						Toast.makeText(getApplicationContext(), "Using default password",
+						Toast.makeText(getApplicationContext(), "Found default password",
 							   Toast.LENGTH_LONG).show();
-						tv3.setText("Company: " + rep.getCompany() + "\n" +
-								"username: " + rep.getDefaultUserName() + "\n" +
-								"password: " + rep.getDefaultPassword() + "\n");
+						user.setText(rep.getDefaultUserName());
+						pass.setText(rep.getDefaultPassword());
+						Company = rep.getCompany();
 					} else {
-						Toast.makeText(getApplicationContext(), "Not using default password",
+						Toast.makeText(getApplicationContext(), "No default password found",
 								   Toast.LENGTH_LONG).show();	
 					}
 					setLog(rep.getHasDefaultPassword());
@@ -177,7 +187,6 @@ public class MainActivity extends Activity {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
 		} else {
         	tv1.setText("No network connection available.");
         }
@@ -192,8 +201,7 @@ public class MainActivity extends Activity {
 		LOG.append(SSID+" ");
 		LOG.append(MAC_ADDRESS);
 		LOG.append(" default_pw:" + response+"\n");
-		LOG_INFO = LOG.toString();
-		WriteLogFile(LOG);
+		LOG_INFO = LOG;
 		Log.d(DEBUG, LOG.toString());
 	}
 	
