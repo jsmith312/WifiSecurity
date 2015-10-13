@@ -26,7 +26,9 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +43,7 @@ public class MainActivity extends Activity {
 	private Button TestDefaultPass;
 	private Button logInfo;
 	private Button sendLogInfo;
+	private Button setPassUser;
 	private String MAC_ADDRESS;
 	private DhcpInfo d;
 	private WifiManager wifi;
@@ -50,6 +53,8 @@ public class MainActivity extends Activity {
 	private ConnectivityManager connMgr;
 	private String LOG_INFO;
 	private Reporter rep;
+	private EditText user;
+	private EditText pass;
 	
 	@SuppressLint("NewApi")	
 	@Override
@@ -67,10 +72,15 @@ public class MainActivity extends Activity {
 		tv2 = (TextView)findViewById(R.id.tv2);
 		tv3 = (TextView)findViewById(R.id.tv3);
 		
+		// EditText
+		user = (EditText)findViewById(R.id.user);
+		pass = (EditText)findViewById(R.id.pass);
+		
 		// Buttons 
 		TestDefaultPass = (Button)findViewById(R.id.default_pass_button);
 		logInfo = (Button)findViewById(R.id.log_info);
 		sendLogInfo = (Button)findViewById(R.id.send_log_info);
+		setPassUser = (Button)findViewById(R.id.set_pw);
 		
 		// Network 
 		connMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -101,6 +111,15 @@ public class MainActivity extends Activity {
         }
 	}
 	
+	public void setUserPass(View view) {
+		InputMethodManager inputManager = 
+		        (InputMethodManager) getApplicationContext().
+		            getSystemService(Context.INPUT_METHOD_SERVICE); 
+		inputManager.hideSoftInputFromWindow(
+		        this.getCurrentFocus().getWindowToken(),
+		        InputMethodManager.HIDE_NOT_ALWAYS); 
+	}
+	
 	public void sendLogInfo(View view) {
 		// Send to server when available
 		tv2.setText("");
@@ -112,33 +131,58 @@ public class MainActivity extends Activity {
 	
 	public void TestPW(View view) {
 		if (networkInfo != null && networkInfo.isConnected()) {
-			HTTPThread thread = new HTTPThread();
-			thread.execute(httpHelper);
-			try {
-				rep = thread.get();
-				if(rep.getHasDefaultPassword() == true) {
-					Toast.makeText(getApplicationContext(), "Using default password",
-						   Toast.LENGTH_LONG).show();
-					tv3.setText("Company: " + rep.getCompany() + "\n" +
-							"username: " + rep.getDefaultUserName() + "\n" +
-							"password: " + rep.getDefaultPassword() + "\n");
-				} else {
-					Toast.makeText(getApplicationContext(), "Not using default password",
-							   Toast.LENGTH_LONG).show();	
+			if (!user.getText().toString().matches("") && 
+					!user.getText().toString().matches("")) {
+				try {
+					httpHelper.setUsername(user.getText().toString());
+					httpHelper.setPassword(pass.getText().toString());
+	    	    	int response = httpHelper.getResponse();
+	    	    	if (response == 401) {
+	    	    		Toast.makeText(getApplicationContext(), "Incorrect password",
+								   Toast.LENGTH_LONG).show();
+	    	    		setLog(false);
+	    	    	} else {
+	    	    		Toast.makeText(getApplicationContext(), "Correct password",
+								   Toast.LENGTH_LONG).show();
+	    	    		tv3.setText("username: " + user.getText().toString() + "\n" +
+								"password: " + pass.getText().toString() + "\n");
+	    	    		setLog(true);
+	    	    	}
+	    		} catch (Exception e) {
+	    			// TODO Auto-generated catch block
+	    			e.printStackTrace();
+	    		}
+				user.setText("");
+				pass.setText("");
+			}	else {
+				HTTPThread thread = new HTTPThread();
+				thread.execute(httpHelper);
+				try {
+					rep = thread.get();
+					if(rep.getHasDefaultPassword() == true) {
+						Toast.makeText(getApplicationContext(), "Using default password",
+							   Toast.LENGTH_LONG).show();
+						tv3.setText("Company: " + rep.getCompany() + "\n" +
+								"username: " + rep.getDefaultUserName() + "\n" +
+								"password: " + rep.getDefaultPassword() + "\n");
+					} else {
+						Toast.makeText(getApplicationContext(), "Not using default password",
+								   Toast.LENGTH_LONG).show();	
+					}
+					setLog(rep.getHasDefaultPassword());
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				setLog(rep.getHasDefaultPassword());
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		} else {
         	tv1.setText("No network connection available.");
         }
 	 }
-		
+	
 	private void setLog(boolean response) {
 		Date d = new Date();
 		StringBuffer LOG = new StringBuffer(); 
@@ -149,7 +193,7 @@ public class MainActivity extends Activity {
 		LOG.append(MAC_ADDRESS);
 		LOG.append(" default_pw:" + response+"\n");
 		LOG_INFO = LOG.toString();
-		//WriteLogFile(LOG);
+		WriteLogFile(LOG);
 		Log.d(DEBUG, LOG.toString());
 	}
 	
