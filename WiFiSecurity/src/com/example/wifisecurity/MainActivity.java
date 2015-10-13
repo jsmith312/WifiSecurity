@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class MainActivity extends Activity {
@@ -48,6 +49,7 @@ public class MainActivity extends Activity {
 	private NetworkInfo networkInfo;
 	private ConnectivityManager connMgr;
 	private String LOG_INFO;
+	private Reporter rep;
 	
 	@SuppressLint("NewApi")	
 	@Override
@@ -113,7 +115,18 @@ public class MainActivity extends Activity {
 			HTTPThread thread = new HTTPThread();
 			thread.execute(httpHelper);
 			try {
-				setLog(thread.get());
+				rep = thread.get();
+				if(rep.getHasDefaultPassword() == true) {
+					Toast.makeText(getApplicationContext(), "Using default password",
+						   Toast.LENGTH_LONG).show();
+					tv3.setText("Company: " + rep.getCompany() + "\n" +
+							"username: " + rep.getDefaultUserName() + "\n" +
+							"password: " + rep.getDefaultPassword() + "\n");
+				} else {
+					Toast.makeText(getApplicationContext(), "Not using default password",
+							   Toast.LENGTH_LONG).show();	
+				}
+				setLog(rep.getHasDefaultPassword());
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -136,7 +149,7 @@ public class MainActivity extends Activity {
 		LOG.append(MAC_ADDRESS);
 		LOG.append(" default_pw:" + response+"\n");
 		LOG_INFO = LOG.toString();
-		WriteLogFile(LOG);
+		//WriteLogFile(LOG);
 		Log.d(DEBUG, LOG.toString());
 	}
 	

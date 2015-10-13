@@ -22,14 +22,15 @@ import android.util.Log;
 import android.widget.Toast;
 
 @SuppressWarnings("deprecation")
-public class HTTPThread extends AsyncTask<HTTPHelper, Void, Boolean> {
+public class HTTPThread extends AsyncTask<HTTPHelper, Void, Reporter> {
 	private HTTPHelper httpHelper; 
 	private String DEBUG = "DEBUG";
 	private boolean hasDefaultPW = false;
 	private String Company;
 	
 	@SuppressLint("NewApi")
-	protected Boolean doInBackground(HTTPHelper... params) {
+	protected Reporter doInBackground(HTTPHelper... params) {
+		Reporter rep = new Reporter(false, "", "", "");
 		// TODO Auto-generated method stub
 		httpHelper = params[0];
 		HttpClient httpClient = new DefaultHttpClient();
@@ -41,6 +42,7 @@ public class HTTPThread extends AsyncTask<HTTPHelper, Void, Boolean> {
 		    String jsonObj = responseString.substring(1,responseString.length()-1);
 		    JSONObject result = new JSONObject(jsonObj);
 		    Company =result.getString("company");
+		    rep.setCompany(Company);
 		    Log.d(DEBUG, responseString.toString());
 		    Log.d(DEBUG, Company);
 		} catch (ClientProtocolException e) {
@@ -79,24 +81,16 @@ public class HTTPThread extends AsyncTask<HTTPHelper, Void, Boolean> {
 				Log.d(DEBUG, "USER:" + httpHelper.getUsername() + " PASS: " + httpHelper.getPassword());
 				Log.d(DEBUG, "USER:" + user + " PASS: " + pass + " RESPONSE "+resp);
 				if (resp != 401) {
-					return true; // has default pw
+					rep.setDefaultUserName(user);
+					rep.setDefaultPassword(pass);
+					rep.setHasDefaultPassword(true);
+					return rep; // has default pw
 				} 
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return false;
+		return rep;
 	}
-	
-	protected void onPostExecute(Boolean result) {
-        // This is executed in main Thread, use the result
-		if(result == true) {
-			Toast.makeText(httpHelper.getContext(), "Using default password",
-				   Toast.LENGTH_LONG).show();
-		} else {
-			Toast.makeText(httpHelper.getContext(), "Not using default password",
-					   Toast.LENGTH_LONG).show();	
-		}
-    }
 }
