@@ -3,6 +3,11 @@ package com.example.wifisecurity;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedWriter;
 import java.io.BufferedReader;
@@ -51,10 +56,11 @@ public class MainActivity extends Activity {
 	private String gatewayIP;
 	private NetworkInfo networkInfo;
 	private ConnectivityManager connMgr;
-	private StringBuffer LOG_INFO;
+	private String LOG_INFO;
 	private String Company;
 	private Reporter rep;
 	private EditText user;
+	private String Log_Path;
 	private EditText pass;
 	
 	@SuppressLint("NewApi")	
@@ -121,9 +127,10 @@ public class MainActivity extends Activity {
 		        InputMethodManager.HIDE_NOT_ALWAYS); 
 	}
 	
-	public void sendLogInfo(View view) {
+	public void sendLogInfo(View view) throws IOException {
 		// Send to server when available
 		WriteLogFile(LOG_INFO);
+		ReadLogFile();
 		tv2.setText("");
 	}
 	
@@ -201,38 +208,35 @@ public class MainActivity extends Activity {
 		LOG.append(SSID+" ");
 		LOG.append(MAC_ADDRESS);
 		LOG.append(" default_pw:" + response+"\n");
-		LOG_INFO = LOG;
+		LOG_INFO = LOG.toString();
 		Log.d(DEBUG, LOG.toString());
 	}
 	
-	private void WriteLogFile(StringBuffer Log) {
-		String eol = System.getProperty("line.separator");
-		try {
-			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-					openFileOutput("LOG", MODE_WORLD_WRITEABLE)));
-			writer.write(Log.append(eol).toString());
-			writer.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	private void WriteLogFile(String log) throws IOException {
+		File path = getApplicationContext().getFilesDir();
+		File file = new File(path, "WifiSecurityAppLog.txt");
+		Log_Path = file.getPath();
+		Log.d(DEBUG, Log_Path);
+		FileOutputStream stream = new FileOutputStream(file,true);
+		stream.write(log.getBytes());
+		stream.close();
 	}
 	
-	private void ReadLogFile() {
-		String eol = System.getProperty("line.separator");
+	private void ReadLogFile() throws IOException {
+		File file = new File(Log_Path);
+		int length = (int) file.length();
+
+		byte[] bytes = new byte[length];
+
+		FileInputStream in = new FileInputStream(file);
 		try {
-			BufferedReader input = new BufferedReader(new InputStreamReader(openFileInput("LOG")));
-			String line;
-			StringBuffer buffer = new StringBuffer();
-			while ((line = input.readLine()) != null) {
-				buffer.append(line + eol);
-			}
-			TextView textView = (TextView) findViewById(R.id.tv3 );
-				if (textView == null) {
-			}
-			textView.setText(buffer.toString());
-		} catch (Exception e) {
-			e.printStackTrace();
+		    in.read(bytes);
+		} finally {
+		    in.close();
 		}
+
+		String contents = new String(bytes);
+		Log.d(DEBUG, contents);
 	}
 	
 	private String FormatIP(int IpAddress) {
