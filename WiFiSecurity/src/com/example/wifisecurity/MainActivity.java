@@ -104,15 +104,8 @@ public class MainActivity extends Activity {
     	    tv1.setText("SSID: " + SSID);
     	    //Log.d(DEBUG, info.getMacAddress());
     	    MAC_ADDRESS = info.getBSSID();
-    	    httpHelper = new HTTPHelper("", "", "http://"+gatewayIP, 
+    	    httpHelper = new HTTPHelper("", "", "http://"+gatewayIP+"/*", 
     	    		MAC_ADDRESS, getApplicationContext());
-    	    try {
-    	    	int response = httpHelper.getResponse();
-    	    	//Log.d(DEBUG, response+"");
-    		} catch (Exception e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
         } else {
         	tv1.setText("No network connection available.");
         }
@@ -140,17 +133,25 @@ public class MainActivity extends Activity {
 	
 	public void testUserPass(View view) {
 		if (networkInfo != null && networkInfo.isConnected()) {
+			try {
+    	    	int response = httpHelper.getResponse();
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
 			if (!user.getText().toString().matches("") && 
 					!user.getText().toString().matches("")) {
 				try {
 					httpHelper.setUsername(user.getText().toString());
 					httpHelper.setPassword(pass.getText().toString());
 	    	    	int response = httpHelper.getResponse();
+	    	    	Toast.makeText(getApplicationContext(), response,
+							   Toast.LENGTH_LONG).show();
 	    	    	if (response == 401) {
 	    	    		Toast.makeText(getApplicationContext(), "Incorrect password",
 								   Toast.LENGTH_LONG).show();
 	    	    		setLog(false);
 	    	    	} else {
+	    	    		
 	    	    		Toast.makeText(getApplicationContext(), "Correct password",
 								   Toast.LENGTH_LONG).show();
 	    	    		tv3.setText("Company: " + Company + "\n" +
